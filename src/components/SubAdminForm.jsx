@@ -110,7 +110,19 @@ export default function SubAdminForm() {
     try {
       await addDoc(collection(db, "entries"), entryData);
 
-      
+      await fetch("/api/send-email", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    to: formData.email,
+    playerName: formData.playerName,
+    sport: formData.sport,
+    amount: formData.amount,
+  }),
+});
+
 
       alert("Entry submitted successfully!");
 
