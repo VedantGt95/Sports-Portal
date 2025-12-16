@@ -22,7 +22,7 @@ export default function SubAdminForm() {
     gender: "Male",
     phone: "",
     email: "",
-    department: "GENIX",
+    department: "ASH",
     year: "1st",
     sport: "",
     category: "",
@@ -30,7 +30,7 @@ export default function SubAdminForm() {
   });
 
   const departments = [
-    "GENIX",
+    "ASH",
     "AI&DS",
     "COMPS",
     "CSE(DS)",
@@ -123,7 +123,7 @@ export default function SubAdminForm() {
         gender: "Male",
         phone: "",
         email: "",
-        department: "GENIX",
+        department: "ASH",
         year: "1st",
         sport: "",
         category: "",
