@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     sport,
     category,
     amount,
-    subAdmin,
+    
   } = req.body;
 
   try {
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
           <hr />
 
           <p><strong>Entry Taken By:</strong> ${entrytakenby}</p>
-          <p><strong>Sub Admin Email:</strong> ${subAdmin}</p>
+         
 
           <br />
           <p>Thank you for registering for the sports event.</p>
