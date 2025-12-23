@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     });
 
     await transporter.sendMail({
-      from: "Sports Portal <noreply@brevo.com>",
+      from: "Sports Portal <vcet.sports@vcet.edu.in>",
       to,
       subject: "Sports Entry Confirmation",
       html: `
