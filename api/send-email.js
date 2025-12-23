@@ -1,18 +1,26 @@
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from "nodemailer";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  try {
-    const { to, playerName, sport, amount } = req.body;
+  const { to, playerName, sport, amount } = req.body;
 
-    await resend.emails.send({
-      from: "Sports Portal <onboarding@resend.dev>",
-      to: to,
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "apikey",
+        pass: process.env.BREVO_SMTP_KEY,
+      },
+    });
+
+    await transporter.sendMail({
+      from: "Sports Portal <noreply@brevo.com>",
+      to,
       subject: "Sports Entry Confirmation",
       html: `
         <h2>Entry Confirmed</h2>
@@ -24,7 +32,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error("Email error:", error);
+    console.error("Brevo email error:", error);
     return res.status(500).json({ error: "Failed to send email" });
   }
 }
