@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         sender: {
           name: "Sports Portal",
-          email: "noreply@brevo.com", // shared sender (allowed)
+          email: "vcet.sports@vcet.edu.in", // shared sender (allowed)
         },
         to: [{ email: to }],
         subject: "Sports Entry Confirmation",
