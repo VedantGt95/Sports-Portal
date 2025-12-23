@@ -3,7 +3,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { to, playerName, sport, amount } = req.body;
+  const {
+    email,
+    entryType,
+    collegeName,
+    playerName,
+    entrytakenby,
+    gender,
+    phone,
+    department,
+    year,
+    sport,
+    category,
+    amount,
+    subAdmin,
+  } = req.body;
 
   try {
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -15,15 +29,42 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         sender: {
           name: "Sports Portal",
-          email: "vcet.sports@vcet.edu.in", // shared sender (allowed)
+          email: "vcet.sports@vcet.edu.in",
         },
-        to: [{ email: to }],
+        to: [{ email }],
         subject: "Sports Entry Confirmation",
         htmlContent: `
-          <h2>Entry Confirmed</h2>
-          <p><strong>Player Name:</strong> ${playerName}</p>
+          <h2>🏆 Sports Entry Confirmation</h2>
+          <hr />
+
+          <p><strong>Entry Type:</strong> ${entryType}</p>
+          ${
+            entryType === "Inter"
+              ? `<p><strong>College Name:</strong> ${collegeName}</p>`
+              : ""
+          }
+
+          <p><strong>Player / Captain Name:</strong> ${playerName}</p>
+          <p><strong>Gender:</strong> ${gender}</p>
+          <p><strong>Phone Number:</strong> ${phone}</p>
+          <p><strong>Email:</strong> ${email}</p>
+
+          <p><strong>Department:</strong> ${department}</p>
+          <p><strong>Year:</strong> ${year}</p>
+
           <p><strong>Sport:</strong> ${sport}</p>
-          <p><strong>Amount:</strong> ₹${amount}</p>
+          <p><strong>Category:</strong> ${category}</p>
+
+          <p><strong>Amount Paid:</strong> ₹${amount}</p>
+
+          <hr />
+
+          <p><strong>Entry Taken By:</strong> ${entrytakenby}</p>
+          <p><strong>Sub Admin Email:</strong> ${subAdmin}</p>
+
+          <br />
+          <p>Thank you for registering for the sports event.</p>
+          <p>Please keep this email for future reference.</p>
         `,
       }),
     });

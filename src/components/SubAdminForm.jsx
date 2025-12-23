@@ -9,11 +9,9 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-
 export default function SubAdminForm() {
   const [subAdmin, setSubAdmin] = useState("");
 
-  
   const [formData, setFormData] = useState({
     entryType: "Intra",
     collegeName: "",
@@ -23,7 +21,7 @@ export default function SubAdminForm() {
     phone: "",
     email: "",
     department: "ASH",
-    year: "1st",
+    year: "FE",
     sport: "",
     category: "",
     amount: "",
@@ -41,9 +39,8 @@ export default function SubAdminForm() {
     "VLSI",
   ];
 
-  const years = ["1st", "2nd", "3rd", "4th"];
+  const years = ["FE", "SE", "TE", "BE"];
 
-  
   const sportsMap = {
     Carrom: ["Boys", "Girls", "Doubles", "Mix"],
     Chess: ["Boys", "Girls", "Doubles", "Mix"],
@@ -57,25 +54,8 @@ export default function SubAdminForm() {
     Badminton: ["Boys", "Girls", "Doubles", "Mix"],
   };
 
-  
-  const sports = [
-    "Box Cricket",
-    "VolleyBall",
-    "Tug of War",
-    "Football",
-    "Powerlifting",
-    "Throwball",
-    "Kabaddi",
-    "Footvolley",
-    "Badminton",
-    "Carrom",
-    "Chess",
-    "Table Tennis",
-    "Overarm Cricket",
-    "Athletics",
-  ];
+  const sports = Object.keys(sportsMap);
 
-  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -85,7 +65,6 @@ export default function SubAdminForm() {
     });
     return () => unsubscribe();
   }, []);
-
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -111,22 +90,18 @@ export default function SubAdminForm() {
       await addDoc(collection(db, "entries"), entryData);
 
       await fetch("/api/send-email", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    to: formData.email,
-    playerName: formData.playerName,
-    sport: formData.sport,
-    amount: formData.amount,
-  }),
-});
-
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          subAdmin,
+        }),
+      });
 
       alert("Entry submitted successfully!");
 
-      
       setFormData({
         entryType: "Intra",
         collegeName: "",
@@ -136,7 +111,7 @@ export default function SubAdminForm() {
         phone: "",
         email: "",
         department: "ASH",
-        year: "1st",
+        year: "FE",
         sport: "",
         category: "",
         amount: "",
@@ -151,13 +126,12 @@ export default function SubAdminForm() {
     <div className="h-screen flex items-center justify-center bg-gray-900">
       <form
         onSubmit={handleSubmit}
-        className="glass p-6 w-96 space-y-3 bg-white/10 rounded-xl shadow-lg"
+        className="p-6 w-96 space-y-3 bg-white/10 rounded-xl shadow-lg"
       >
         <h2 className="text-2xl font-bold text-white mb-4">
           Sub Admin Entry
         </h2>
 
-        
         <div className="flex gap-4 text-white">
           {["Inter", "Intra"].map((t) => (
             <label key={t}>
@@ -187,27 +161,24 @@ export default function SubAdminForm() {
           />
         )}
 
-        <input
-          type="text"
-          placeholder="Player/Captain Name"
-          value={formData.playerName}
-          onChange={(e) =>
-            setFormData({ ...formData, playerName: e.target.value })
-          }
-          className="w-full p-2 rounded bg-gray-800 text-white"
-          required
-        />
-
-        <input
-          type="text"
-          placeholder="Entry taken by"
-          value={formData.entrytakenby}
-          onChange={(e) =>
-            setFormData({ ...formData, entrytakenby: e.target.value })
-          }
-          className="w-full p-2 rounded bg-gray-800 text-white"
-          required
-        />
+        {[
+          ["Player/Captain Name", "playerName"],
+          ["Entry taken by", "entrytakenby"],
+          ["Phone Number", "phone"],
+          ["Email", "email"],
+        ].map(([placeholder, key]) => (
+          <input
+            key={key}
+            type={key === "email" ? "email" : "text"}
+            placeholder={placeholder}
+            value={formData[key]}
+            onChange={(e) =>
+              setFormData({ ...formData, [key]: e.target.value })
+            }
+            className="w-full p-2 rounded bg-gray-800 text-white"
+            required
+          />
+        ))}
 
         <select
           value={formData.gender}
@@ -220,28 +191,6 @@ export default function SubAdminForm() {
           <option>Female</option>
           <option>Other</option>
         </select>
-
-        <input
-          type="tel"
-          placeholder="Phone Number"
-          value={formData.phone}
-          onChange={(e) =>
-            setFormData({ ...formData, phone: e.target.value })
-          }
-          className="w-full p-2 rounded bg-gray-800 text-white"
-          required
-        />
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) =>
-            setFormData({ ...formData, email: e.target.value })
-          }
-          className="w-full p-2 rounded bg-gray-800 text-white"
-          required
-        />
 
         <select
           value={formData.department}
@@ -270,11 +219,7 @@ export default function SubAdminForm() {
         <select
           value={formData.sport}
           onChange={(e) =>
-            setFormData({
-              ...formData,
-              sport: e.target.value,
-              category: "",
-            })
+            setFormData({ ...formData, sport: e.target.value, category: "" })
           }
           className="w-full p-2 rounded bg-gray-800 text-white"
           required
@@ -285,7 +230,6 @@ export default function SubAdminForm() {
           ))}
         </select>
 
-     
         {sportsMap[formData.sport] && (
           <select
             value={formData.category}
