@@ -9,14 +9,15 @@ export default async function handler(req, res) {
 
   try {
     const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: "apikey",
-        pass: process.env.BREVO_SMTP_KEY,
-      },
-    });
+  host: "smtp-relay.brevo.com",
+  port: 465,          // 🔴 CHANGE HERE
+  secure: true,       // 🔴 CHANGE HERE (TLS)
+  auth: {
+    user: "apikey",
+    pass: process.env.BREVO_SMTP_KEY,
+  },
+});
+
 
     await transporter.sendMail({
       from: "Sports Portal <vcet.sports@vcet.edu.in>",
