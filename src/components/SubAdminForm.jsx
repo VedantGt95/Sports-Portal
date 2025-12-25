@@ -37,27 +37,28 @@ export default function SubAdminForm() {
     "MECH",
     "IT",
     "VLSI",
+    "-",
   ];
 
-  const years = ["FE", "SE", "TE", "BE"];
+  const years = ["FE", "SE", "TE", "BE","-"];
 
   const sportsMap = {
     Carrom: ["Singles", "Department", "Doubles", "Mix"],
     Chess: ["Boys", "Girls", "Doubles", "Mix"],
     "Table Tennis": ["Single", "Doubles", "Girls", "Department"],
     Athletics: ["100m", "200m", "Relay", "Shotput"],
-    "Girls Cricket": [],
+    "Girls Cricket": ["-"],
     VolleyBall: ["Boys", "Girls"],
     "Tug of War": ["Boys", "Girls"],
     Football: ["Boys", "Girls"],
     Kabaddi: ["Boys", "Girls"],
     Badminton: ["Singles", "Doubles", "Department"],
-    PowerLifting: [],
-    "Arm Wrestling": [],
-    FootVolley: [],
-    "Box Cricket": [],
-    "Overarm Cricket": [],
-    Throwball: [],
+    PowerLifting: ["-"],
+    "Arm Wrestling": ["-"],
+    FootVolley: ["-"],
+    "Box Cricket": ["-"],
+    "Overarm Cricket": ["-"],
+    Throwball: ["-"],
     CarromGirls: ["Singles", "Doubles"],
     PickleBall:["Singles","Doubles"],
   };
