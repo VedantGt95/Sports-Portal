@@ -20,7 +20,7 @@ export default function SubAdminForm() {
     gender: "Male",
     phone: "",
     email: "",
-    department: "ASH",
+    department: "",
     year: "FE",
     sport: "",
     category: "",
@@ -42,16 +42,24 @@ export default function SubAdminForm() {
   const years = ["FE", "SE", "TE", "BE"];
 
   const sportsMap = {
-    Carrom: ["Boys", "Girls", "Doubles", "Mix"],
+    Carrom: ["Singles", "Department", "Doubles", "Mix"],
     Chess: ["Boys", "Girls", "Doubles", "Mix"],
-    "Table Tennis": ["Single", "Doubles"],
+    "Table Tennis": ["Single", "Doubles", "Girls", "Department"],
     Athletics: ["100m", "200m", "Relay", "Shotput"],
-    "Girls Cricket": ["Team"],
+    "Girls Cricket": [],
     VolleyBall: ["Boys", "Girls"],
     "Tug of War": ["Boys", "Girls"],
     Football: ["Boys", "Girls"],
     Kabaddi: ["Boys", "Girls"],
-    Badminton: ["Boys", "Girls", "Doubles", "Mix"],
+    Badminton: ["Singles", "Doubles", "Department"],
+    PowerLifting: [],
+    "Arm Wrestling": [],
+    FootVolley: [],
+    "Box Cricket": [],
+    "Overarm Cricket": [],
+    Throwball: [],
+    CarromGirls: ["Singles", "Doubles"],
+    PickleBall:["Singles","Doubles"],
   };
 
   const sports = Object.keys(sportsMap);
@@ -73,8 +81,7 @@ export default function SubAdminForm() {
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () =>
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [subAdmin]);
 
   const handleSubmit = async (e) => {
@@ -110,7 +117,7 @@ export default function SubAdminForm() {
         gender: "Male",
         phone: "",
         email: "",
-        department: "ASH",
+        department: "",
         year: "FE",
         sport: "",
         category: "",
@@ -128,9 +135,7 @@ export default function SubAdminForm() {
         onSubmit={handleSubmit}
         className="p-6 w-96 space-y-3 bg-white/10 rounded-xl shadow-lg"
       >
-        <h2 className="text-2xl font-bold text-white mb-4">
-          Sub Admin Entry
-        </h2>
+        <h2 className="text-2xl font-bold text-white mb-4">Sub Admin Entry</h2>
 
         <div className="flex gap-4 text-white">
           {["Inter", "Intra"].map((t) => (
@@ -182,9 +187,7 @@ export default function SubAdminForm() {
 
         <select
           value={formData.gender}
-          onChange={(e) =>
-            setFormData({ ...formData, gender: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
           className="w-full p-2 rounded bg-gray-800 text-white"
         >
           <option>Male</option>
@@ -194,11 +197,15 @@ export default function SubAdminForm() {
 
         <select
           value={formData.department}
+          
           onChange={(e) =>
             setFormData({ ...formData, department: e.target.value })
           }
           className="w-full p-2 rounded bg-gray-800 text-white"
         >
+        <option value="" disabled>
+    Select Department
+  </option>
           {departments.map((d) => (
             <option key={d}>{d}</option>
           ))}
@@ -206,9 +213,7 @@ export default function SubAdminForm() {
 
         <select
           value={formData.year}
-          onChange={(e) =>
-            setFormData({ ...formData, year: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, year: e.target.value })}
           className="w-full p-2 rounded bg-gray-800 text-white"
         >
           {years.map((y) => (
@@ -237,7 +242,7 @@ export default function SubAdminForm() {
               setFormData({ ...formData, category: e.target.value })
             }
             className="w-full p-2 rounded bg-gray-800 text-white"
-            required
+            
           >
             <option value="">Select Category</option>
             {sportsMap[formData.sport].map((c) => (
@@ -250,9 +255,7 @@ export default function SubAdminForm() {
           type="number"
           placeholder="Amount"
           value={formData.amount}
-          onChange={(e) =>
-            setFormData({ ...formData, amount: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
           className="w-full p-2 rounded bg-gray-800 text-white"
           required
         />
