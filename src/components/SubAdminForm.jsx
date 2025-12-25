@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
 import {
   collection,
   addDoc,
@@ -7,11 +7,10 @@ import {
   setDoc,
   doc,
 } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function SubAdminForm() {
   const [subAdmin, setSubAdmin] = useState("");
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     entryType: "Intra",
@@ -29,78 +28,84 @@ export default function SubAdminForm() {
   });
 
   const departments = [
-    "ASH","AI&DS","COMPS","CSE(DS)","EXTC",
-    "CIVIL","MECH","IT","VLSI","-"
+    "ASH",
+    "AI&DS",
+    "COMPS",
+    "CSE(DS)",
+    "EXTC",
+    "CIVIL",
+    "MECH",
+    "IT",
+    "VLSI",
+    "-",
   ];
 
-  const years = ["FE", "SE", "TE", "BE", "-"];
+  const years = ["FE", "SE", "TE", "BE","-"];
 
   const sportsMap = {
-    Carrom: ["Singles", "Doubles", "Mix"],
-    Chess: ["Boys", "Girls"],
-    "Table Tennis": ["Singles", "Doubles"],
-    Athletics: ["100m", "200m", "Relay"],
-    Football: ["Boys"],
-    Kabaddi: ["Boys"],
-    Badminton: ["Singles", "Doubles"],
+    Carrom: ["Singles", "Department", "Doubles", "Mix"],
+    Chess: ["Boys", "Girls", "Doubles", "Mix"],
+    "Table Tennis": ["Single", "Doubles", "Girls", "Department"],
+    Athletics: ["100m", "200m", "Relay", "Shotput"],
+    "Girls Cricket": ["-"],
+    VolleyBall: ["Boys", "Girls"],
+    "Tug of War": ["Boys", "Girls"],
+    Football: ["Boys", "Girls"],
+    Kabaddi: ["Boys", "Girls"],
+    Badminton: ["Singles", "Doubles", "Department"],
     PowerLifting: ["-"],
+    "Arm Wrestling": ["-"],
+    FootVolley: ["-"],
+    "Box Cricket": ["-"],
+    "Overarm Cricket": ["-"],
+    Throwball: ["-"],
+    CarromGirls: ["Singles", "Doubles"],
+    PickleBall:["Singles","Doubles"],
   };
 
   const sports = Object.keys(sportsMap);
 
-  /* =====================
-     SESSION CHECK
-     ===================== */
   useEffect(() => {
-    const email = localStorage.getItem("subAdminEmail");
-    const role = localStorage.getItem("subAdminRole");
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setSubAdmin(user.email);
+        setDoc(doc(db, "users", user.email), { active: true }, { merge: true });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
-    if (!email || role !== "sub") {
-      navigate("/");
-      return;
-    }
-
-    setSubAdmin(email);
-    setDoc(doc(db, "users", email), { active: true }, { merge: true });
-  }, [navigate]);
-
-  /* =====================
-     ACTIVE FALSE ON CLOSE
-     ===================== */
   useEffect(() => {
-    const handleUnload = () => {
+    const handleBeforeUnload = () => {
       if (subAdmin) {
         setDoc(doc(db, "users", subAdmin), { active: false }, { merge: true });
       }
     };
-    window.addEventListener("beforeunload", handleUnload);
-    return () => window.removeEventListener("beforeunload", handleUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [subAdmin]);
 
-  /* =====================
-     HANDLE CHANGE
-     ===================== */
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  /* =====================
-     SUBMIT ENTRY
-     ===================== */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const entryData = {
+      ...formData,
+      subAdmin,
+      timestamp: serverTimestamp(),
+    };
+
     try {
-      await addDoc(collection(db, "entries"), {
-        ...formData,
-        subAdmin,
-        timestamp: serverTimestamp(),
-      });
+      await addDoc(collection(db, "entries"), entryData);
 
       await fetch("/api/send-email", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, subAdmin }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          subAdmin,
+        }),
       });
 
       alert("Entry submitted successfully!");
@@ -126,52 +131,141 @@ export default function SubAdminForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+    <div className="h-screen flex items-center justify-center bg-gray-900">
       <form
         onSubmit={handleSubmit}
         className="p-6 w-96 space-y-3 bg-white/10 rounded-xl shadow-lg"
       >
-        <h2 className="text-2xl font-bold text-white">Sub Admin Entry</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">Sub Admin Entry</h2>
 
-        <select name="entryType" value={formData.entryType} onChange={handleChange} className="w-full p-2 rounded">
-          <option>Intra</option>
-          <option>Inter</option>
+        <div className="flex gap-4 text-white">
+          {["Inter", "Intra"].map((t) => (
+            <label key={t}>
+              <input
+                type="radio"
+                value={t}
+                checked={formData.entryType === t}
+                onChange={(e) =>
+                  setFormData({ ...formData, entryType: e.target.value })
+                }
+              />{" "}
+              {t}
+            </label>
+          ))}
+        </div>
+
+        {formData.entryType === "Inter" && (
+          <input
+            type="text"
+            placeholder="College Name"
+            value={formData.collegeName}
+            onChange={(e) =>
+              setFormData({ ...formData, collegeName: e.target.value })
+            }
+            className="w-full p-2 rounded bg-gray-800 text-white"
+            required
+          />
+        )}
+
+        {[
+          ["Player/Captain Name", "playerName"],
+          ["Entry taken by", "entrytakenby"],
+          ["Phone Number", "phone"],
+          ["Email", "email"],
+        ].map(([placeholder, key]) => (
+          <input
+            key={key}
+            type={key === "email" ? "email" : "text"}
+            placeholder={placeholder}
+            value={formData[key]}
+            onChange={(e) =>
+              setFormData({ ...formData, [key]: e.target.value })
+            }
+            className="w-full p-2 rounded bg-gray-800 text-white"
+            required
+          />
+        ))}
+
+        <select
+          value={formData.gender}
+          onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+          className="w-full p-2 rounded bg-gray-800 text-white"
+        >
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
         </select>
 
-        <input name="collegeName" placeholder="College Name" value={formData.collegeName} onChange={handleChange} className="w-full p-2 rounded" />
-        <input name="playerName" placeholder="Player Name" value={formData.playerName} onChange={handleChange} className="w-full p-2 rounded" />
-        <input name="entrytakenby" placeholder="Entry Taken By" value={formData.entrytakenby} onChange={handleChange} className="w-full p-2 rounded" />
-        <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} className="w-full p-2 rounded" />
-        <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="w-full p-2 rounded" />
-
-        <select name="department" value={formData.department} onChange={handleChange} className="w-full p-2 rounded">
-          <option value="">Department</option>
-          {departments.map((d) => <option key={d}>{d}</option>)}
+        <select
+          value={formData.department}
+          
+          onChange={(e) =>
+            setFormData({ ...formData, department: e.target.value })
+          }
+          className="w-full p-2 rounded bg-gray-800 text-white"
+        >
+        <option value="" disabled>
+    Select Department
+  </option>
+          {departments.map((d) => (
+            <option key={d}>{d}</option>
+          ))}
         </select>
 
-        <select name="year" value={formData.year} onChange={handleChange} className="w-full p-2 rounded">
-          {years.map((y) => <option key={y}>{y}</option>)}
+        <select
+          value={formData.year}
+          onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+          className="w-full p-2 rounded bg-gray-800 text-white"
+        >
+          {years.map((y) => (
+            <option key={y}>{y}</option>
+          ))}
         </select>
 
-        <select name="sport" value={formData.sport} onChange={handleChange} className="w-full p-2 rounded">
-          <option value="">Sport</option>
-          {sports.map((s) => <option key={s}>{s}</option>)}
+        <select
+          value={formData.sport}
+          onChange={(e) =>
+            setFormData({ ...formData, sport: e.target.value, category: "" })
+          }
+          className="w-full p-2 rounded bg-gray-800 text-white"
+          required
+        >
+          <option value="">Select Sport</option>
+          {sports.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
         </select>
 
-        <select name="category" value={formData.category} onChange={handleChange} className="w-full p-2 rounded">
-          <option value="">Category</option>
-          {formData.sport &&
-            sportsMap[formData.sport]?.map((c) => (
+        {sportsMap[formData.sport] && (
+          <select
+            value={formData.category}
+            onChange={(e) =>
+              setFormData({ ...formData, category: e.target.value })
+            }
+            className="w-full p-2 rounded bg-gray-800 text-white"
+            
+          >
+            <option value="">Select Category</option>
+            {sportsMap[formData.sport].map((c) => (
               <option key={c}>{c}</option>
             ))}
-        </select>
+          </select>
+        )}
 
-        <input name="amount" placeholder="Amount" value={formData.amount} onChange={handleChange} className="w-full p-2 rounded" />
+        <input
+          type="number"
+          placeholder="Amount"
+          value={formData.amount}
+          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+          className="w-full p-2 rounded bg-gray-800 text-white"
+          required
+        />
 
         <button className="w-full bg-blue-600 py-2 rounded text-white font-semibold">
-          Submit Entry
+          Submit
         </button>
       </form>
     </div>
   );
 }
+

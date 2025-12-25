@@ -7,6 +7,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -15,45 +16,50 @@ export default function Login() {
     const loginEmail = email.trim().toLowerCase();
 
     try {
+      console.log("Attempting login for:", loginEmail);
+
+     
       const userRef = doc(db, "users", loginEmail);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
+        console.log("No Firestore document found");
         alert("User not registered!");
         return;
       }
 
       const data = userSnap.data();
+      console.log("Firestore data:", data);
+
       const role = data.role?.trim().toLowerCase();
 
-      // 🔐 MASTER ADMIN (Firebase Auth)
       if (role === "master") {
+        console.log("Logging in master via Firebase Auth");
         await signInWithEmailAndPassword(auth, loginEmail, password);
-        await setDoc(userRef, { active: true }, { merge: true });
-        navigate("/admin");
-        return;
-      }
 
-      // 🔓 SUB ADMIN (Firestore only – Option A)
-      if (role === "sub") {
+      } else if (role === "sub") {
+        console.log("Logging in sub-admin via Firestore password");
         if (data.password !== password) {
           alert("Invalid email or password");
           return;
         }
 
-        // manual session
-        localStorage.setItem("subAdminEmail", loginEmail);
-        localStorage.setItem("subAdminRole", "sub");
-
-        await setDoc(userRef, { active: true }, { merge: true });
-        navigate("/subadmin");
+      } else {
+        console.log("Invalid role:", data.role);
+        alert("Invalid role");
         return;
       }
 
-      alert("Invalid role");
+     
+      await setDoc(userRef, { active: true }, { merge: true });
+
+     
+      if (role === "master") navigate("/admin");
+      else if (role === "sub") navigate("/subadmin");
+
     } catch (err) {
-      console.error(err);
-      alert("Login failed");
+      console.error("Login error:", err);
+      alert("Invalid email or password");
     }
   };
 
@@ -80,10 +86,12 @@ export default function Login() {
           required
         />
 
-        <button className="w-full bg-blue-500 py-2 rounded text-white">
+        <button type="submit" className="w-full bg-blue-500 py-2 rounded">
           Login
         </button>
       </form>
     </div>
   );
 }
+
+
