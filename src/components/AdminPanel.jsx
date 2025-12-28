@@ -70,12 +70,36 @@ export default function AdminPanel() {
   return a.timestamp.seconds - b.timestamp.seconds; 
 });
 
+const totalIntraAmount = sortedEntries
+  .filter((e) => e.entryType === "Intra")
+  .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+const totalInterAmount = sortedEntries
+  .filter((e) => e.entryType === "Inter")
+  .reduce((sum, e) => sum + Number(e.amount || 0), 0);
 
   return (
     <>
+    
       <h2 className="text-3xl md:text-4xl font-extrabold mb-10 text-center text-green-400 tracking-wide">
         VCET Sports Committee Master Admin
       </h2>
+      <div className="flex gap-6 mb-4">
+  <div className="bg-green-600/20 border border-green-500 p-4 rounded-lg">
+    <p className="text-sm text-green-300">Total Intra Collection</p>
+    <p className="text-2xl font-bold text-green-400">
+      ₹ {totalIntraAmount}
+    </p>
+  </div>
+
+  <div className="bg-blue-600/20 border border-blue-500 p-4 rounded-lg">
+    <p className="text-sm text-blue-300">Total Inter Collection</p>
+    <p className="text-2xl font-bold text-blue-400">
+      ₹ {totalInterAmount}
+    </p>
+  </div>
+</div>
+
 
       <div className="flex flex-col gap-12">
         {["Inter", "Intra"].map((type) => (
