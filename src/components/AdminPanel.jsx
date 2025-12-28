@@ -65,6 +65,11 @@ export default function AdminPanel() {
       timeStyle: "short",
     });
   };
+  const sortedEntries = [...entries].sort((a, b) => {
+  if (!a.timestamp || !b.timestamp) return 0;
+  return a.timestamp.seconds - b.timestamp.seconds; 
+});
+
 
   return (
     <>
@@ -142,7 +147,7 @@ export default function AdminPanel() {
                 </thead>
 
                 <tbody>
-                  {entries
+                  {sortedEntries
                     .filter((e) => e.entryType === type)
                     .map((e) => (
                       <tr
